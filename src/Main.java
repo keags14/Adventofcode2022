@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 public class Main {
     public static int overlapping_Count = 0;
-    static AtomicInteger number = new AtomicInteger();
+    static AtomicInteger number = new AtomicInteger(0);
     public static void Day1(){
         List <Integer> resultList = new ArrayList();
         HashMap <String, Integer> caloriesList = new LinkedHashMap<>();
@@ -667,7 +667,7 @@ public class Main {
             }
             number_Of_Visible_Trees = (rows.size() * 2L) + ((column-2) * 2L);
             boolean isVisible = false;
-            Map<Integer, Integer> indexOfValue;
+            Map <Integer, Integer> indexOfValue;
             Map<Integer, String> visibleTrees = new LinkedHashMap<>();
             List <Integer> answer = new ArrayList<>();
 
@@ -698,14 +698,18 @@ public class Main {
                         directions.put("down", downValues);
                     }
 
+
                     for (Map.Entry<String, List<Integer>> direction: directions.entrySet()) {
                        for (int k = 0; k < direction.getValue().size(); k++) {
-                           indexOfValue = direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> direction.getValue().indexOf(val), Function.identity(), (o1,o2) -> o1));
+                           //int[] newValues = direction.getValue().toArray();
+                           //indexOfValue = direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> direction.getValue().indexOf(val), val -> val, (o1,o2) -> o1));
+                           indexOfValue = direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> number.getAndIncrement(), Function.identity(), (o1,o2) -> o1));
+                           number.set(0);
                            direction.getValue().sort((o1, o2) -> o2 - o1);
                            Optional<Integer> sumTotal = indexOfValue.entrySet().stream().filter(item -> item.getValue().equals(direction.getValue().get(0))).map(Map.Entry::getKey).findFirst();
                            if(grid[i][j] > direction.getValue().get(k)) {
                                isVisible = true;
-                               sumTotal.ifPresent(integer -> answer.add(integer + 1));
+                               sumTotal.ifPresent(integer -> answer.add(direction.getValue().size()));
                                if(visibleTrees.containsKey(grid[i][j])) {
                                    visibleTrees.put(grid[i][j], visibleTrees.get(grid[i][j]).concat("," + direction.getKey()));
                                } else {
