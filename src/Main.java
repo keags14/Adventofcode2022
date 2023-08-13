@@ -703,13 +703,21 @@ public class Main {
                        for (int k = 0; k < direction.getValue().size(); k++) {
                            //int[] newValues = direction.getValue().toArray();
                            //indexOfValue = direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> direction.getValue().indexOf(val), val -> val, (o1,o2) -> o1));
-                           indexOfValue = direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> number.getAndIncrement(), Function.identity(), (o1,o2) -> o1));
+                           indexOfValue = new TreeMap<>(direction.getValue().stream().collect(Collectors.toUnmodifiableMap(val -> number.getAndIncrement(), Function.identity(), (o1,o2) -> o2 - o1)));
                            number.set(0);
+                           Optional<Integer> sumTotal;
+                           int finalI = i;
+                           int finalJ = j;
                            direction.getValue().sort((o1, o2) -> o2 - o1);
-                           Optional<Integer> sumTotal = indexOfValue.entrySet().stream().filter(item -> item.getValue().equals(direction.getValue().get(0))).map(Map.Entry::getKey).findFirst();
                            if(grid[i][j] > direction.getValue().get(k)) {
+                               //sumTotal = indexOfValue.entrySet().stream().filter(item -> item.getValue().equals(direction.getValue().get(0))).map(Map.Entry::getKey).findFirst();
                                isVisible = true;
-                               sumTotal.ifPresent(integer -> answer.add(direction.getValue().size()));
+                               List<Integer> visibleValues = indexOfValue.entrySet().stream().filter(item -> grid[finalI][finalJ] > item.getValue()).map(Map.Entry::getKey).toList();
+                               number.set(0);
+                               if(visibleValues.size() == direction.getValue().size()){
+                                   answer.add(direction.getValue().size());
+                               }
+                               //sumTotal.ifPresent(integer -> answer.add(integer + 1));
                                if(visibleTrees.containsKey(grid[i][j])) {
                                    visibleTrees.put(grid[i][j], visibleTrees.get(grid[i][j]).concat("," + direction.getKey()));
                                } else {
@@ -717,6 +725,7 @@ public class Main {
                                }
                                break;
                            } else if (grid[i][j] <= direction.getValue().get(k)) {
+                               sumTotal = indexOfValue.entrySet().stream().filter(item -> grid[finalI][finalJ] <= item.getValue()).map(Map.Entry::getKey).findFirst();
                                sumTotal.ifPresent(integer -> answer.add(integer + 1));
                                break;
                            }
