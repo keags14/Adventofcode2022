@@ -638,7 +638,7 @@ public class Main {
         }
     }
     public static void Day8(){
-        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\example");
+        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\day8_input.txt");
         List<String> rows = new ArrayList<>();
         int row = 0;
         int column = 0;
@@ -659,6 +659,7 @@ public class Main {
             int[][] grid = new int[row][column];
             String[] columns;
             long number_Of_Visible_Trees = 0;
+            List<Integer> treeScore = new ArrayList<>();
             for (int i = 0; i < rows.size(); i++) {
                 columns = rows.get(i).split("");
                 for (int j = 0; j < columns.length; j++) {
@@ -739,11 +740,14 @@ public class Main {
                        System.out.println("Number " + grid[i][j] + " is not visible from any direction");
                    }
                     System.out.println("Scenic score: " + answer.stream().reduce(1, (subTotal, element) -> subTotal * element));
+                    treeScore.add(answer.stream().reduce(1, (subTotal, element) -> subTotal * element));
                     visibleTrees.clear();
                     answer.clear();
                 }
             }
             System.out.println("A total of " + number_Of_Visible_Trees + " trees are visible in this arrangement.");
+            treeScore.sort((o1,o2) -> o2-o1);
+            System.out.println("The ideal spot for the house has a score of " + treeScore.get(0));
         }
     }
     public static void Day9(){
