@@ -1,9 +1,5 @@
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -751,18 +747,147 @@ public class Main {
         }
     }
     public static void Day9(){
-        File file = new File("");
+        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\example");
+        Map<String, Integer> gridSize = new LinkedHashMap<>();
+        AtomicInteger row = new AtomicInteger();
+        AtomicInteger column = new AtomicInteger();
+        Optional<Integer> rowValue;
+        Optional<Integer> columnValue;
+        List<String> commands = new ArrayList<>();
         try{
             Scanner myReader = new Scanner(file);
             while(myReader.hasNextLine()){
-
+                String token = myReader.nextLine();
+                commands.add(token);
+                gridMap(token, gridSize);
+                rowValue = gridSize.entrySet().stream().filter(key -> key.getKey().equals("U") || key.getKey().equals("D")).map(Map.Entry::getValue).max(Integer::compare);
+                columnValue = gridSize.entrySet().stream().filter(key -> key.getKey().equals("L") || key.getKey().equals("R")).map(Map.Entry::getValue).max(Integer::compare);
+                rowValue.ifPresent(row::set);
+                columnValue.ifPresent(column::set);
+                System.out.println(token);
             }
             myReader.close();
         }catch (FileNotFoundException ex){
             System.out.println("File not found.");
             ex.printStackTrace();
+        } finally {
+            Map<String, String> positionsVisited = new LinkedHashMap<>();
+            ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(row, column);
+
+            printGridValues(row, column, grid);
+
+            for (String command: commands) {
+                int moves = Integer.parseInt(command.split(" ")[1]);
+                int count = 0;
+                int startingPosition;
+                if(command.split(" ")[0].equals("R")){
+                    startingPosition = getHeadStartingPosition(positionsVisited);
+                    for (int col = startingPosition; col < moves; col++) {
+                        String knotValue = grid.get(row.get()).get(col).poll();
+                        getPositionOfKnot(positionsVisited, knotValue, row, col);
+                        if (knotValue != null) {
+                            grid.get(row.get()).get(col+1).offer(knotValue);
+                        }
+                        
+                        if(count > 0) {
+                            knotValue = grid.get(row.get()).get(col-1).poll();
+                            getPositionOfKnot(positionsVisited, knotValue, row, col);
+                            if(knotValue != null) {
+                                grid.get(row.get()).get(col).offer(knotValue);
+                            }
+                        }
+                        count++;
+                    }
+                } else if (command.split(" ")[0].equals("L")) {
+
+                } else if (command.split(" ")[0].equals("U")) {
+                    startingPosition = getHeadStartingPosition(positionsVisited);
+                    for (int col = startingPosition; col < moves; col++) {
+                        String knotValue = grid.get(row.get()).get(col).poll();
+                        getPositionOfKnot(positionsVisited, knotValue, row, col);
+                        if (knotValue != null) {
+                            grid.get(row.get()).get(col+1).offer(knotValue);
+                        }
+
+                        if(count > 0) {
+                            knotValue = grid.get(row.get()).get(col-1).poll();
+                            getPositionOfKnot(positionsVisited, knotValue, row, col);
+                            if(knotValue != null) {
+                                grid.get(row.get()).get(col).offer(knotValue);
+                            }
+                        }
+                        count++;
+                    }
+                } else if (command.split(" ")[0].equals("D")) {
+
+                }
+            }
+            System.out.println(grid);
         }
     }
+
+    private static void getPositionOfKnot(Map<String, String> positionsVisited, String knotValue, AtomicInteger row, int col) {
+        if(positionsVisited.containsKey(knotValue)) {
+            positionsVisited.put(knotValue, positionsVisited.get(knotValue).concat(", (" + row.get() + ","+ col +")"));
+        } else {
+            positionsVisited.putIfAbsent(knotValue, "(" + row.get() +"," + col + ")");
+        }
+    }
+
+    private static int getHeadStartingPosition(Map<String, String> positionsVisited) {
+        String[] currentHeadPosition;
+        int startingPosition;
+        if(positionsVisited.get("H") == null){
+            startingPosition = 0;
+        } else {
+            currentHeadPosition = positionsVisited.get("H").split(", ")[positionsVisited.get("H").split(", ").length-1].replaceAll("[()]", "").split(",");
+            startingPosition = Integer.parseInt(currentHeadPosition[0]);
+        }
+        return startingPosition;
+    }
+
+    private static void printGridValues(AtomicInteger row, AtomicInteger column, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
+        for (int i = 0; i < row.get()+1; i++) {
+            for (int j = 0; j < column.get()+1; j++) {
+                Integer startVertex = i;
+                String endVertex = grid.get(i).get(j).toString();
+                System.out.printf("Vertex %d is connected to vertex %s%n", startVertex, endVertex);
+            }
+        }
+    }
+
+    private static ArrayList<ArrayList<LinkedBlockingQueue<String>>> createGridInitialState(AtomicInteger row, AtomicInteger column) {
+        LinkedBlockingQueue<String> points = new LinkedBlockingQueue<>();
+        ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = new ArrayList<>(row.get()+1);
+
+        points.offer("H");
+        points.offer("T");
+        points.offer("s");
+
+        for (int i = 0; i < row.get()+1; i++) {
+            grid.add(new ArrayList<>());
+            for (int j = 0; j < column.get()+1; j++) {
+                if(i == row.get() && j == 0) {
+                    grid.get(row.get()).add(points);
+                } else {
+                    grid.get(i).add(new LinkedBlockingQueue<>());
+                }
+            }
+        }
+        return grid;
+    }
+
+    private static void gridMap(String token, Map<String, Integer> gridSize) {
+        String[] input = token.split(" ");
+        if(gridSize.containsKey(input[0])){
+            if(gridSize.get(input[0]) < Integer.parseInt(input[1])) {
+                gridSize.put(input[0], Integer.parseInt(input[1]));
+            }
+        } else {
+            gridSize.putIfAbsent(input[0], Integer.parseInt(input[1]));
+        }
+    }
+
     public static void Day10(){
         File file = new File("");
         try{
@@ -1061,6 +1186,7 @@ public class Main {
         //Day5();
         //Day6();
         //Day7();
-        Day8();
+        //Day8();
+        Day9();
     }
 }
