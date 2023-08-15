@@ -764,7 +764,7 @@ public class Main {
                 columnValue = gridSize.entrySet().stream().filter(key -> key.getKey().equals("L") || key.getKey().equals("R")).map(Map.Entry::getValue).max(Integer::compare);
                 rowValue.ifPresent(rows::set);
                 columnValue.ifPresent(columns::set);
-                System.out.println(token);
+                //System.out.println(token);
             }
             myReader.close();
         }catch (FileNotFoundException ex){
@@ -773,19 +773,16 @@ public class Main {
         } finally {
             Map<String, String> positionsVisited = new LinkedHashMap<>();
             ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(rows, columns);
-
-            printGridValues(rows, columns, grid);
-
             for (String command: commands) {
                 int moves = Integer.parseInt(command.split(" ")[1]);
                 int count = 0;
                 int row, column;
                 List<Integer> startingPosition;
                 if(command.split(" ")[0].equals("R")){
-                    startingPosition = getHeadStartingPosition(positionsVisited, rows);
+                    startingPosition = getKnotPosition(positionsVisited, rows, "H", 1);
                     row = startingPosition.get(0);
                     column = startingPosition.get(1);
-                    int headColumn = 0, tailColumn;
+                    int headColumn = 0, tailColumn, tailRow;
                     for (int col = 0; col < moves; col++) {
                         String knotValue = grid.get(row).get(column).poll();
                         if (knotValue != null) {
@@ -795,11 +792,15 @@ public class Main {
                         getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
                         if(count > 0) {
-                            tailColumn = column - 1;
-                            knotValue = grid.get(row).get(tailColumn).poll();
+                            startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
+                            tailRow = startingPosition.get(0);
+                            tailColumn = startingPosition.get(1);
+                            knotValue = grid.get(tailRow).get(tailColumn).poll();
                             if(knotValue != null) {
-                                tailColumn = tailColumn + 1;
-                                grid.get(row).get(tailColumn).offer(knotValue);
+                                startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
+                                tailRow = startingPosition.get(0);
+                                tailColumn =startingPosition.get(1);
+                                grid.get(tailRow).get(tailColumn).offer(knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, row, tailColumn);
                         }
@@ -807,9 +808,36 @@ public class Main {
                         count++;
                     }
                 } else if (command.split(" ")[0].equals("L")) {
+                    startingPosition = getKnotPosition(positionsVisited, rows, "H", 1);
+                    row = startingPosition.get(0);
+                    column = startingPosition.get(1);
+                    int headColumn = 0, tailColumn = 0, tailRow;
+                    for (int col = 0; col < moves; col++) {
+                        String knotValue = grid.get(row).get(column).poll();
+                        if (knotValue != null) {
+                            headColumn = column - 1;
+                            grid.get(row).get(headColumn).offer(knotValue);
+                        }
+                        getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
+                        if (count > 0) {
+                            startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
+                            tailRow = startingPosition.get(0);
+                            tailColumn =startingPosition.get(1);
+                            knotValue = grid.get(tailRow).get(tailColumn).poll();
+                            if (knotValue != null) {
+                                startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
+                                tailRow = startingPosition.get(0);
+                                tailColumn =startingPosition.get(1);
+                                grid.get(startingPosition.get(0)).get(startingPosition.get(1)).offer(knotValue);
+                            }
+                            getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
+                        }
+                        column--;
+                        count++;
+                    }
                 } else if (command.split(" ")[0].equals("U")) {
-                    startingPosition = getHeadStartingPosition(positionsVisited, rows);
+                    startingPosition = getKnotPosition(positionsVisited, rows, "H", 1);
                     row = startingPosition.get(0);
                     column = startingPosition.get(1);
                     int headRow = 0, tailColumn, tailRow;
@@ -822,20 +850,14 @@ public class Main {
                         getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
                         if(count > 0) {
-                            tailRow = row + 1;
-                            if(count == 1) {
-                                tailColumn = column - 1;
-                            } else {
-                                tailColumn = column;
-                            }
+                            startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
+                            tailRow = startingPosition.get(0);
+                            tailColumn = startingPosition.get(1);
                             knotValue = grid.get(tailRow).get(tailColumn).poll();
                             if(knotValue != null) {
-                                tailRow = tailRow - 1;
-                                if(count == 1) {
-                                    tailColumn = tailColumn + 1;
-                                } else {
-                                    tailColumn = tailColumn;
-                                }
+                                startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
+                                tailRow = startingPosition.get(0);
+                                tailColumn = startingPosition.get(1);
                                 grid.get(tailRow).get(tailColumn).offer(knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
@@ -844,10 +866,38 @@ public class Main {
                         count++;
                     }
                 } else if (command.split(" ")[0].equals("D")) {
+                    startingPosition = getKnotPosition(positionsVisited, rows, "H", 1);
+                    row = startingPosition.get(0);
+                    column = startingPosition.get(1);
+                    int headRow = 0, tailColumn, tailRow;
+                    for (int col = 0; col < moves; col++) {
+                        String knotValue = grid.get(row).get(column).poll();
+                        if (knotValue != null) {
+                            headRow = row + 1;
+                            grid.get(headRow).get(column).offer(knotValue);
+                        }
+                        getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
+                        if(count > 0) {
+                            startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
+                            tailRow = startingPosition.get(0);
+                            tailColumn = startingPosition.get(1);
+                            knotValue = grid.get(tailRow).get(tailColumn).poll();
+                            if(knotValue != null) {
+                                startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
+                                tailRow = startingPosition.get(0);
+                                tailColumn = startingPosition.get(1);
+                                grid.get(tailRow).get(tailColumn).offer(knotValue);
+                            }
+                            getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
+                        }
+                        row++;
+                        count++;
+                    }
                 }
             }
-            System.out.println(grid);
+            printGridValues(rows, grid);
+            System.out.println(positionsVisited);
         }
     }
 
@@ -859,16 +909,17 @@ public class Main {
         }
     }
 
-    private static List<Integer> getHeadStartingPosition(Map<String, String> positionsVisited, AtomicInteger noOfRows) {
+    private static List<Integer> getKnotPosition(Map<String, String> positionsVisited, AtomicInteger noOfRows, String knotsPart, int lastPositionIndex) {
         String[] currentHeadPosition;
         int row;
         int column;
         List<Integer> startingPosition = new ArrayList<>();
-        if(positionsVisited.get("H") == null){
+        if(positionsVisited.get(knotsPart) == null){
             row = noOfRows.get();
             column = 0;
+            positionsVisited.put(knotsPart, "(" + row + "," + column + ")");
         } else {
-            currentHeadPosition = positionsVisited.get("H").split(", ")[positionsVisited.get("H").split(", ").length-1].replaceAll("[()]", "").split(",");
+            currentHeadPosition = positionsVisited.get(knotsPart).split(", ")[positionsVisited.get(knotsPart).split(", ").length - lastPositionIndex].replaceAll("[()]", "").split(",");
             row = Integer.parseInt(currentHeadPosition[0]);
             column = Integer.parseInt(currentHeadPosition[1]);
         }
@@ -877,13 +928,12 @@ public class Main {
         return startingPosition;
     }
 
-    private static void printGridValues(AtomicInteger rows, AtomicInteger columns, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
+    private static void printGridValues(AtomicInteger rows, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
+        int row, column = 0;
         for (int i = 0; i < rows.get()+1; i++) {
-            for (int j = 0; j < columns.get()+1; j++) {
-                Integer startVertex = i;
-                String endVertex = grid.get(i).get(j).toString();
-                System.out.printf("Vertex %d is connected to vertex %s%n", startVertex, endVertex);
-            }
+            Integer startVertex = i;
+            String endVertex = grid.get(i).toString();
+            System.out.printf("Vertex %d is connected to vertex %s%n", startVertex, endVertex);
         }
     }
 
