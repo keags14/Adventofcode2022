@@ -791,7 +791,7 @@ public class Main {
                         }
                         getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
-                        if(count > 0) {
+                        if(!checkTailPosition(getKnotPosition(positionsVisited, rows, "H", 1), getKnotPosition(positionsVisited, rows, "T", 1))) {
                             startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
                             tailRow = startingPosition.get(0);
                             tailColumn = startingPosition.get(1);
@@ -820,7 +820,7 @@ public class Main {
                         }
                         getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
-                        if (count > 0) {
+                        if (!checkTailPosition(getKnotPosition(positionsVisited, rows, "H", 1), getKnotPosition(positionsVisited, rows, "T", 1))) {
                             startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
                             tailRow = startingPosition.get(0);
                             tailColumn =startingPosition.get(1);
@@ -849,7 +849,7 @@ public class Main {
                         }
                         getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
-                        if(count > 0) {
+                        if(!checkTailPosition(getKnotPosition(positionsVisited, rows, "H", 1), getKnotPosition(positionsVisited, rows, "T", 1))) {
                             startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
                             tailRow = startingPosition.get(0);
                             tailColumn = startingPosition.get(1);
@@ -878,7 +878,7 @@ public class Main {
                         }
                         getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
-                        if(count > 0) {
+                        if(!checkTailPosition(getKnotPosition(positionsVisited, rows, "H", 1), getKnotPosition(positionsVisited, rows, "T", 1))) {
                             startingPosition = getKnotPosition(positionsVisited, rows, "T", 1);
                             tailRow = startingPosition.get(0);
                             tailColumn = startingPosition.get(1);
@@ -898,7 +898,48 @@ public class Main {
             }
             printGridValues(rows, grid);
             System.out.println(positionsVisited.get("T"));
+            printFinalMap(positionsVisited, grid);
         }
+    }
+    private static Boolean checkTailPosition(List<Integer> positionOfHead, List<Integer> positionOfTail) {
+        int headRow = 0, headColumn = 0, tailRow = 0, tailColumn = 0;
+        boolean isAdjacent = false;
+        Map<String, String> headAdjacentValues = new LinkedHashMap<>();
+        headRow = positionOfHead.get(0);
+        headColumn = positionOfHead.get(1);
+        tailRow = positionOfTail.get(0);
+        tailColumn = positionOfTail.get(1);
+
+        List<String> adjacentSides = List.of("Top", "Bottom", "Left", "Right", "Top Right", "Top Left", "Bottom Right", "Bottom Left", "Centre");
+
+        for (int i = 0; i < adjacentSides.size(); i++) {
+            if(adjacentSides.get(i).equals("Top")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow - 1) + ","+ headColumn + ")");
+            } else if(adjacentSides.get(i).equals("Bottom")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow + 1) + ","+ headColumn + ")");
+            } else if(adjacentSides.get(i).equals("Left")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow) + ","+ (headColumn - 1)  + ")");
+            } else if(adjacentSides.get(i).equals("Right")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow) + ","+ (headColumn + 1) + ")");
+            } else if(adjacentSides.get(i).equals("Top Left")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow - 1) + ","+ (headColumn - 1) + ")");
+            } else if(adjacentSides.get(i).equals("Top Right")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow - 1) + ","+ (headColumn + 1) + ")");
+            } else if(adjacentSides.get(i).equals("Bottom Left")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow + 1) + ","+ (headColumn - 1) + ")");
+            }else if(adjacentSides.get(i).equals("Bottom Right")) {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + (headRow + 1) + ","+ (headColumn + 1) + ")");
+            } else {
+                headAdjacentValues.put(adjacentSides.get(i), "(" + headRow + ","+ headColumn + ")");
+            }
+        }
+        for (Map.Entry<String, String> adjacentValuesCheck: headAdjacentValues.entrySet()) {
+            if(adjacentValuesCheck.getValue().equals("(" + tailRow + ","+ tailColumn + ")")) {
+                isAdjacent = true;
+            }
+        }
+
+        return isAdjacent;
     }
 
     private static LinkedBlockingQueue<String> requeueElements(LinkedBlockingQueue<String> queue, String elementsToBeAdded) {
@@ -943,12 +984,17 @@ public class Main {
     }
 
     private static void printGridValues(AtomicInteger rows, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
-        int row, column = 0;
         for (int i = 0; i < rows.get()+1; i++) {
             Integer startVertex = i;
             String endVertex = grid.get(i).toString();
             System.out.printf("Vertex %d is connected to vertex %s%n", startVertex, endVertex);
         }
+    }
+
+    private static void printFinalMap(Map<String, String> positionNavigationGrid, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
+        int row, column = 0;
+        positionNavigationGrid.entrySet().stream().filter(val -> val.getKey().equals("T")).map(points -> Arrays.stream(points.getValue().split(", ")).map(p -> p.replaceAll("[()]", "").split(",")).map(r -> grid.get(Integer.parseInt(r[0])).get(Integer.parseInt(r[1])).add("#")).collect(Collectors.toList())).collect(Collectors.toList());
+        printGridValues(new AtomicInteger(4), grid);
     }
 
     private static ArrayList<ArrayList<LinkedBlockingQueue<String>>> createGridInitialState(AtomicInteger row, AtomicInteger column) {
