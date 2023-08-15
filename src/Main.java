@@ -787,7 +787,7 @@ public class Main {
                         String knotValue = grid.get(row).get(column).poll();
                         if (knotValue != null) {
                             headColumn = column + 1;
-                            grid.get(row).get(headColumn).offer(knotValue);
+                            requeueElements(grid.get(row).get(headColumn), knotValue);
                         }
                         getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
@@ -800,7 +800,7 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
                                 tailRow = startingPosition.get(0);
                                 tailColumn =startingPosition.get(1);
-                                grid.get(tailRow).get(tailColumn).offer(knotValue);
+                                requeueElements(grid.get(tailRow).get(tailColumn), knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, row, tailColumn);
                         }
@@ -816,7 +816,7 @@ public class Main {
                         String knotValue = grid.get(row).get(column).poll();
                         if (knotValue != null) {
                             headColumn = column - 1;
-                            grid.get(row).get(headColumn).offer(knotValue);
+                            requeueElements(grid.get(row).get(headColumn), knotValue);
                         }
                         getPositionOfKnot(positionsVisited, knotValue, row, headColumn);
 
@@ -829,7 +829,7 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
                                 tailRow = startingPosition.get(0);
                                 tailColumn =startingPosition.get(1);
-                                grid.get(startingPosition.get(0)).get(startingPosition.get(1)).offer(knotValue);
+                                requeueElements(grid.get(startingPosition.get(0)).get(startingPosition.get(1)), knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
                         }
@@ -845,7 +845,7 @@ public class Main {
                         String knotValue = grid.get(row).get(column).poll();
                         if (knotValue != null) {
                             headRow = row -1;
-                            grid.get(headRow).get(column).offer(knotValue);
+                            requeueElements(grid.get(headRow).get(column), knotValue);
                         }
                         getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
@@ -858,7 +858,7 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
                                 tailRow = startingPosition.get(0);
                                 tailColumn = startingPosition.get(1);
-                                grid.get(tailRow).get(tailColumn).offer(knotValue);
+                                requeueElements(grid.get(tailRow).get(tailColumn), knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
                         }
@@ -874,7 +874,7 @@ public class Main {
                         String knotValue = grid.get(row).get(column).poll();
                         if (knotValue != null) {
                             headRow = row + 1;
-                            grid.get(headRow).get(column).offer(knotValue);
+                            requeueElements(grid.get(headRow).get(column), knotValue);
                         }
                         getPositionOfKnot(positionsVisited, knotValue, headRow, column);
 
@@ -887,7 +887,7 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsVisited, rows, "H", 2);
                                 tailRow = startingPosition.get(0);
                                 tailColumn = startingPosition.get(1);
-                                grid.get(tailRow).get(tailColumn).offer(knotValue);
+                                requeueElements(grid.get(tailRow).get(tailColumn), knotValue);
                             }
                             getPositionOfKnot(positionsVisited, knotValue, tailRow, tailColumn);
                         }
@@ -897,8 +897,22 @@ public class Main {
                 }
             }
             printGridValues(rows, grid);
-            System.out.println(positionsVisited);
+            System.out.println(positionsVisited.get("T"));
         }
+    }
+
+    private static LinkedBlockingQueue<String> requeueElements(LinkedBlockingQueue<String> queue, String elementsToBeAdded) {
+        Stack<String> elementToBeDequeued = new Stack<>();
+        if(queue.isEmpty()) {
+            queue.offer(elementsToBeAdded);
+        } else {
+            queue.drainTo(elementToBeDequeued);
+            queue.offer(elementsToBeAdded);
+            for (int i = 0; i < elementToBeDequeued.size(); i++) {
+                queue.offer(elementToBeDequeued.pop());
+            }
+        }
+        return queue;
     }
 
     private static void getPositionOfKnot(Map<String, String> positionsVisited, String knotValue,int row, int col) {
