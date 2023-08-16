@@ -746,8 +746,8 @@ public class Main {
             System.out.println("The ideal spot for the house has a score of " + treeScore.get(0));
         }
     }
-    public static void Day9(){
-        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\day9_input.txt");
+    public static void Day9(int part){
+        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\example");
         Map<String, Integer> gridSize = new LinkedHashMap<>();
         AtomicInteger rows = new AtomicInteger();
         AtomicInteger columns = new AtomicInteger();
@@ -774,7 +774,7 @@ public class Main {
             rows.set(1000);
             columns.set(1000);
             Map<String, String> positionsVisited = new LinkedHashMap<>();
-            ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(rows, columns);
+            ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(rows, columns, part);
             for (String command: commands) {
                 int moves = Integer.parseInt(command.split(" ")[1]);
                 int count = 0;
@@ -1008,13 +1008,21 @@ public class Main {
         printGridValues(new AtomicInteger(4), grid);
     }
 
-    private static ArrayList<ArrayList<LinkedBlockingQueue<String>>> createGridInitialState(AtomicInteger row, AtomicInteger column) {
+    private static ArrayList<ArrayList<LinkedBlockingQueue<String>>> createGridInitialState(AtomicInteger row, AtomicInteger column, int part) {
         LinkedBlockingQueue<String> points = new LinkedBlockingQueue<>();
         ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = new ArrayList<>(row.get()+1);
 
-        points.offer("H");
-        points.offer("T");
-        points.offer("s");
+        if(part == 1) {
+            points.offer("H");
+            points.offer("T");
+            points.offer("s");
+        } else {
+            points.offer("H");
+            for (int i = 0; i < 9; i++) {
+                points.offer(String.valueOf(i+1));
+            }
+            points.offer("s");
+        }
 
         for (int i = 0; i < row.get(); i++) {
             grid.add(new ArrayList<>());
@@ -1339,6 +1347,6 @@ public class Main {
         //Day6();
         //Day7();
         //Day8();
-        Day9();
+        Day9(2);
     }
 }
