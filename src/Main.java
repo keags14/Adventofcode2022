@@ -957,9 +957,7 @@ public class Main {
             if(part == 1) {
                 answer = positionOfTailsVisitedAtLeastOnce(positionsVisited.get("T"));
             } else {
-                for (int i = 0; i < 9; i++) {
-                    answer += positionOfTailsVisitedAtLeastOnce(String.valueOf(9));
-                }
+                answer = positionOfTailsVisitedAtLeastOnce(positionsVisited.get(String.valueOf(9)));
             }
             System.out.printf("There are %s positions the tail visited at least once %n", answer);
         }
