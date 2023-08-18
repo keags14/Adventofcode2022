@@ -773,8 +773,8 @@ public class Main {
             ex.printStackTrace();
         } finally {
             int totalNumberOfKnots = 0;
-            rows.set(commands.size() * 2);
-            columns.set(commands.size() * 2);
+            rows.set(commands.size() * 4);
+            columns.set(commands.size() * 4);
             Map<String, String> positionsVisited = new LinkedHashMap<>();
             ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(rows, columns, part);
             List<String> knot = getListOfKnots(part);
@@ -821,7 +821,9 @@ public class Main {
                                 count++;
                                 noOfKnots--;
                             } while(noOfKnots > 0);
-                            totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            if(!Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()).equals("s")) {
+                                totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            }
                         }
                         column++;
                     }
@@ -859,7 +861,9 @@ public class Main {
                                 count++;
                                 noOfKnots--;
                             } while(noOfKnots > 0);
-                            totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            if(!Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()).equals("s")) {
+                                totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            }
                         }
                         column--;
                     }
@@ -897,7 +901,11 @@ public class Main {
                                 count++;
                                 noOfKnots--;
                             } while (noOfKnots > 0);
-                            totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            if(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()).equals("s")) {
+                                if(!Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()).equals("s")) {
+                                    totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                                }
+                            }
                         }
                         row--;
                     }
@@ -935,7 +943,9 @@ public class Main {
                             count++;
                             noOfKnots--;
                             } while (noOfKnots > 0);
-                            totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            if(!Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()).equals("s")) {
+                                totalNumberOfKnots = Integer.parseInt(Objects.requireNonNull(grid.get(rows.get() / 2).get(columns.get() / 2).peek()));
+                            }
                         }
                         row++;
                     }
@@ -948,7 +958,7 @@ public class Main {
                 answer = positionOfTailsVisitedAtLeastOnce(positionsVisited.get("T"));
             } else {
                 for (int i = 0; i < 9; i++) {
-                    answer += positionOfTailsVisitedAtLeastOnce(String.valueOf(i+1));
+                    answer += positionOfTailsVisitedAtLeastOnce(String.valueOf(9));
                 }
             }
             System.out.printf("There are %s positions the tail visited at least once %n", answer);
@@ -1089,9 +1099,8 @@ public class Main {
 
     private static void printGridValues(AtomicInteger rows, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
         for (int i = 0; i <= rows.get()/2; i++) {
-            int startVertex = i;
             String endVertex = grid.get(i).toString();
-            System.out.printf("Vertex %d is connected to vertex %s%n", startVertex, endVertex);
+            System.out.printf("Vertex %d is connected to vertex %s%n", i, endVertex);
         }
     }
 
