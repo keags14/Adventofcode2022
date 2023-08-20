@@ -747,7 +747,7 @@ public class Main {
         }
     }
     public static void Day9(int part){
-        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\example");
+        File file = new File("D:\\IntelliJ Projects\\Adventodcode\\day9_input.txt");
         Map<String, Integer> gridSize = new LinkedHashMap<>();
         AtomicInteger rows = new AtomicInteger();
         AtomicInteger columns = new AtomicInteger();
@@ -766,8 +766,8 @@ public class Main {
             ex.printStackTrace();
         } finally {
             int totalNumberOfKnots = 0;
-            rows.set(commands.size() * 4);
-            columns.set(commands.size() * 4);
+            rows.set(commands.size());
+            columns.set(commands.size());
             Map<String, String> positionsKnotVisited = new LinkedHashMap<>();
             ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid = createGridInitialState(rows, columns, part);
             List<String> knot = getListOfKnots(part);
@@ -790,13 +790,20 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1);
                                 row = startingPosition.get(0);
                                 column = startingPosition.get(1);
-                                if (grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H")) {
+                                if (grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H") && grid.get(row).get(column).size() == 1) {
                                     knotValue = grid.get(row).get(column).poll();
                                     if (knotValue != null) {
                                         headColumn = column + 1;
                                         requeueElements(grid.get(row).get(headColumn), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
                                     }
-                                    getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
+                                } else if(grid.get(row).get(column).size() > 1){
+                                    knotValue = getKnotValue(grid.get(row).get(column), knot.get(count));
+                                    if (knotValue != null) {
+                                        headColumn = column + 1;
+                                        requeueElements(grid.get(row).get(headColumn), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
+                                    }
                                 }
 
                                 if (!checkTailPosition(getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1), getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count + 1), 1))) {
@@ -821,7 +828,6 @@ public class Main {
                             }
                         }
                         column++;
-                        printGridValues(rows, grid);
                     }
                     case "L" -> {
                         int headColumn = 0, tailColumn = 0, tailRow;
@@ -832,13 +838,20 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1);
                                 row = startingPosition.get(0);
                                 column = startingPosition.get(1);
-                                if (grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H")) {
+                                if (grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H") && grid.get(row).get(column).size() == 1) {
                                     knotValue = grid.get(row).get(column).poll();
                                     if (knotValue != null) {
                                         headColumn = column - 1;
                                         requeueElements(grid.get(row).get(headColumn), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
                                     }
-                                    getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
+                                } else if(grid.get(row).get(column).size() > 1){
+                                    knotValue = getKnotValue(grid.get(row).get(column), knot.get(count));
+                                    if (knotValue != null) {
+                                        headColumn = column - 1;
+                                        requeueElements(grid.get(row).get(headColumn), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, row, headColumn);
+                                    }
                                 }
 
                                 if (!checkTailPosition(getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1), getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count + 1), 1))) {
@@ -863,7 +876,6 @@ public class Main {
                             }
                         }
                         column--;
-                        printGridValues(rows, grid);
                     }
                     case "U" -> {
                         int headRow = 0, tailColumn, tailRow;
@@ -874,13 +886,20 @@ public class Main {
                                 startingPosition = getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1);
                                 row = startingPosition.get(0);
                                 column = startingPosition.get(1);
-                                if(grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H")) {
+                                if(grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H") && grid.get(row).get(column).size() == 1) {
                                     knotValue = grid.get(row).get(column).poll();
                                     if (knotValue != null) {
                                         headRow = row - 1;
                                         requeueElements(grid.get(headRow).get(column), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
                                     }
-                                    getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
+                                } else if(grid.get(row).get(column).size() > 1){
+                                    knotValue = getKnotValue(grid.get(row).get(column), knot.get(count));
+                                    if (knotValue != null) {
+                                        headRow = row - 1;
+                                        requeueElements(grid.get(headRow).get(column), knotValue);
+                                        getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
+                                    }
                                 }
 
                                 if (!checkTailPosition(getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1), getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count + 1), 1))) {
@@ -905,7 +924,6 @@ public class Main {
                             }
                         }
                         row--;
-                        printGridValues(rows, grid);
                     }
                     case "D" -> {
                         int headRow = 0, tailColumn, tailRow;
@@ -916,13 +934,20 @@ public class Main {
                             startingPosition = getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1);
                             row = startingPosition.get(0);
                             column = startingPosition.get(1);
-                            if(grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H")) {
+                            if(grid.get(row).get(column).peek() != null && grid.get(row).get(column).peek().equals("H") && grid.get(row).get(column).size() == 1) {
                                 knotValue = grid.get(row).get(column).poll();
                                 if (knotValue != null) {
                                     headRow = row + 1;
                                     requeueElements(grid.get(headRow).get(column), knotValue);
+                                    getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
                                 }
-                                getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
+                            } else if(grid.get(row).get(column).size() > 1){
+                                knotValue = getKnotValue(grid.get(row).get(column), knot.get(count));
+                                if (knotValue != null) {
+                                    headRow = row - 1;
+                                    requeueElements(grid.get(headRow).get(column), knotValue);
+                                    getPositionOfKnot(positionsKnotVisited, knotValue, headRow, column);
+                                }
                             }
 
                             if (!checkTailPosition(getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count), 1), getKnotPosition(positionsKnotVisited, rows, columns, knot.get(count + 1), 1))) {
@@ -947,7 +972,6 @@ public class Main {
                             }
                         }
                         row++;
-                        printGridValues(rows, grid);
                     }
                 }
             }
@@ -957,7 +981,7 @@ public class Main {
                 answer = positionOfTailsVisitedAtLeastOnce(positionsKnotVisited.get("T"));
             } else {
                 if(positionTailVisited.get("9") != null){
-                    answer = positionOfTailsVisitedAtLeastOnce(positionTailVisited.get(String.valueOf(9)));
+                    answer = positionOfTailsVisitedAtLeastOnce(positionsKnotVisited.get(String.valueOf(9)));
                     //printFinalMap(positionsKnotVisited, grid, rows, "9");
                 }
                 else {
@@ -966,6 +990,22 @@ public class Main {
             }
             System.out.printf("There are %s positions the tail visited at least once %n", answer);
         }
+    }
+
+    private static String getKnotValue(LinkedBlockingQueue<String> knotQueue, String knotSelected) {
+        String value = null;
+        List<String> knotQueueValue = new ArrayList<>();
+        for (String result : knotQueue) {
+            if (result.equals("H") && knotSelected.equals("H")) {
+                knotQueue.drainTo(knotQueueValue);
+                knotQueueValue.remove(knotSelected);
+                for (int i = 0; i < knotQueueValue.size(); i++) {
+                    knotQueue.offer(knotQueueValue.get(i));
+                }
+                value = knotSelected;
+            }
+        }
+        return value;
     }
 
     private static List<Integer> moveTail(List<Integer> headStartingPosition, List<Integer> headEndingPosition, List<Integer> tailStartingPosition) {
@@ -982,19 +1022,19 @@ public class Main {
         if(headEndingPosX - tailStartingPosX < 0 && headEndingPosY - tailStartingPosY == 0) {
             tailPosX = tailStartingPosX - 1;
             tailPosY = tailStartingPosY;
-            System.out.println("Top");
+            //System.out.println("Top");
         } else if(headEndingPosX - tailStartingPosX > 0 && headEndingPosY - tailStartingPosY == 0) {
             tailPosX = tailStartingPosX + 1;
             tailPosY = tailStartingPosY;
-            System.out.println("Bottom");
+            //System.out.println("Bottom");
         } else if (headEndingPosX - tailStartingPosX == 0 && headEndingPosY - tailStartingPosY < 0) {
             tailPosX = tailStartingPosX;
             tailPosY = tailStartingPosY - 1;
-            System.out.println("left");
+            //System.out.println("left");
         } else if (headEndingPosX - tailStartingPosX == 0 && headEndingPosY - tailStartingPosY > 0) {
             tailPosX = tailStartingPosX;
             tailPosY = tailStartingPosY + 1;
-            System.out.println("Right");
+            //System.out.println("Right");
         } else if(headEndingPosX - tailStartingPosX < 0 && headEndingPosY - tailStartingPosY > 0) {
             tailPosX = tailStartingPosX - 1;
             tailPosY = tailStartingPosY + 1;
@@ -1109,7 +1149,7 @@ public class Main {
     }
 
     private static void printGridValues(AtomicInteger rows, ArrayList<ArrayList<LinkedBlockingQueue<String>>> grid) {
-        for (int i = 0; i <= rows.get()/2; i++) {
+        for (int i = 0; i <= rows.get()-1; i++) {
             for (int j = 0; j < rows.get(); j++) {
                 if(grid.get(i).get(j).peek() != null) {
                     String endVertex = grid.get(i).get(j).peek();
